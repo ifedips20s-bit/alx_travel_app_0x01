@@ -1,33 +1,39 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-class Listing(models.Model):
-    name = models.CharField(max_length=255)
-    description = models.TextField()
-    price_per_night = models.DecimalField(max_digits=8, decimal_places=2)
-    location = models.CharField(max_length=255)
-    host = models.ForeignKey(User, on_delete=models.CASCADE, related_name='listings')
+# No import needed for Booking since it's in the same models.py
+
+class Payment(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    booking = models.ForeignKey('Booking', on_delete=models.CASCADE)  # <-- use string reference
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_id = models.CharField(max_length=100, unique=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.user.username} - {self.transaction_id} - {self.status}"
 
+class Listing(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    # other fields
 
 class Booking(models.Model):
-    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='bookings')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')
-    check_in = models.DateField()
-    check_out = models.DateField()
-
-    def __str__(self):
-        return f"{self.user.username} - {self.listing.name}"
-
-
-class Review(models.Model):
-    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='reviews')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
-    rating = models.IntegerField()
-    comment = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
+    start_date = models.DateField()
+    end_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user.username} review for {self.listing.name}"
+        return f"{self.user.username} - {self.listing.title}"

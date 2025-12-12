@@ -1,5 +1,9 @@
 from rest_framework import serializers
-from .models import Listing, Booking
+from .models import Listing, Booking, Payment
+from rest_framework import serializers
+from .models import Listing
+
+
 
 class ListingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -10,4 +14,9 @@ class ListingSerializer(serializers.ModelSerializer):
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
+        fields = '__all__'
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
         fields = '__all__'
